@@ -1,7 +1,0 @@
-spring:
-  data:
-    cassandra:
-      contact-points: 127.0.0.1
-      port: 9040
-      keyspace-name: ulixes_keyspace
-      local-datacenter: Ithaca_datacenter
