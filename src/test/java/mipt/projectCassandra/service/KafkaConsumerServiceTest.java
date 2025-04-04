@@ -31,7 +31,7 @@ import org.testcontainers.utility.DockerImageName;
     properties = {
       "topic-to-consume-message=test-topic",
       "spring.kafka.consumer.group-id=some-consumer-group",
-      "spring.kafka.consumer.auto-offset-reset=earliest" // Add this
+      "spring.kafka.consumer.auto-offset-reset=earliest"
     })
 @Import({KafkaAutoConfiguration.class, KafkaConsumerServiceTest.ObjectMapperTestConfig.class})
 @Testcontainers
