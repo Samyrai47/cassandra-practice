@@ -1,14 +1,20 @@
 package mipt.projectCassandra.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import java.util.List;
 import java.util.UUID;
 import mipt.projectCassandra.entity.UserAudit;
 import mipt.projectCassandra.exception.UserNotFoundException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -25,8 +31,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "spring.data.cassandra.keyspace-name=${spring.cassandra.keyspace-name}",
       "spring.data.cassandra.local-datacenter=datacenter1"
     })
+@TestMethodOrder(OrderAnnotation.class)
 class UserAuditServiceTest {
   @Autowired private UserAuditService userAuditService;
+  @Autowired private CqlSession session;
 
   @Container
   private static final CassandraContainer cassandraContainer =
@@ -44,6 +52,16 @@ class UserAuditServiceTest {
 
     System.out.println("Cassandra container IP: " + cassandraContainer.getContainerIpAddress());
     System.out.println("Cassandra container port: " + cassandraContainer.getMappedPort(9042));
+  }
+
+  @Test
+  @Order(1)
+  void shouldFailToGetAudit() {
+    assertThrows(
+        UserNotFoundException.class, () -> userAuditService.readUserAudit(UUID.randomUUID()));
+    SimpleStatement statement = SimpleStatement.newInstance("SELECT * FROM datacenter1.user_audit");
+    ResultSet resultSet = session.execute(statement);
+    assertEquals(false, resultSet.iterator().hasNext());
   }
 
   @Test
@@ -67,13 +85,7 @@ class UserAuditServiceTest {
   @Test
   void shouldSuccessfullyGetAudit() {
     List<UserAudit> result = userAuditService.readUserAudit(uuid);
-    Assertions.assertEquals("User UPDATE from IP 192.168.1.1", result.getFirst().description());
-    Assertions.assertEquals(uuid, result.getFirst().userId());
-  }
-
-  @Test
-  void shouldFailToGetAudit() {
-    assertThrows(
-        UserNotFoundException.class, () -> userAuditService.readUserAudit(UUID.randomUUID()));
+    assertEquals("User UPDATE from IP 192.168.1.1", result.getFirst().description());
+    assertEquals(uuid, result.getFirst().userId());
   }
 }
