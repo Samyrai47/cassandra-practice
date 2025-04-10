@@ -68,6 +68,7 @@ class UserAuditServiceTest {
   void shouldSuccessfullyGetAudit() {
     List<UserAudit> result = userAuditService.readUserAudit(uuid);
     Assertions.assertEquals("User UPDATE from IP 192.168.1.1", result.getFirst().description());
+    Assertions.assertEquals(uuid, result.getFirst().userId());
   }
 
   @Test
