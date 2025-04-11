@@ -1,0 +1,31 @@
+version: "3.3"
+
+networks:
+  cassandra-net:
+    driver: bridge
+
+services:
+  cassandra-1:
+    image: "cassandra:latest"
+    container_name: "cassandra-1"
+    ports:
+      - 9042:9042
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_START_RPC=true
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0
+      - CASSANDRA_LISTEN_ADDRESS=auto
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=Ithaca_datacenter
+    volumes:
+      - cassandra-node-1:/var/lib/cassandra:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh -e 'describe keyspaces'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  cassandra-node-1:

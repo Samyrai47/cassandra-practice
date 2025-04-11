@@ -5,3 +5,9 @@ spring:
       port: 9040
       keyspace-name: ulixes_keyspace
       local-datacenter: Ithaca_datacenter
+  kafka:
+    bootstrap-servers: localhost:29093
+    consumer:
+      group-id: audit-group
+      enable-auto-commit: true
+topic-to-consume-message: audit-topic

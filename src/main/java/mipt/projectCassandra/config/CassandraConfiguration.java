@@ -43,7 +43,7 @@ public class CassandraConfiguration {
         String.format(
             """
             CREATE TABLE IF NOT EXISTS %s
-            .user_audit (user_id UUID, event_time TIMESTAMP, event_type TEXT, event_details TEXT, PRIMARY KEY ((user_id), event_time))
+            .user_audit (user_id BIGINT, event_time TIMESTAMP, event_type TEXT, event_details TEXT, PRIMARY KEY ((user_id), event_time))
             WITH CLUSTERING ORDER BY (event_time DESC) AND default_time_to_live = 31536000;
             """,
             keyspaceName));

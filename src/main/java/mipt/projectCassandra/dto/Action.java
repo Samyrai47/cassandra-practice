@@ -1,4 +1,4 @@
-package mipt.projectCassandra.service;
+package mipt.projectCassandra.dto;
 
 public enum Action {
   SELECT,

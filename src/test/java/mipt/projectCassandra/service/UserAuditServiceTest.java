@@ -7,7 +7,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
+import mipt.projectCassandra.dto.Action;
 import mipt.projectCassandra.entity.UserAudit;
 import mipt.projectCassandra.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +41,7 @@ class UserAuditServiceTest {
   private static final CassandraContainer cassandraContainer =
       new CassandraContainer("cassandra:3.11.2").withExposedPorts(9042);
 
-  private static final UUID uuid = UUID.randomUUID();
+  private static final Long id = new Random().nextLong();
 
   @BeforeAll
   static void setupCassandraConnectionProperties() {
@@ -58,7 +59,7 @@ class UserAuditServiceTest {
   @Order(1)
   void shouldFailToGetAudit() {
     assertThrows(
-        UserNotFoundException.class, () -> userAuditService.readUserAudit(UUID.randomUUID()));
+        UserNotFoundException.class, () -> userAuditService.readUserAudit(new Random().nextLong()));
     SimpleStatement statement = SimpleStatement.newInstance("SELECT * FROM datacenter1.user_audit");
     ResultSet resultSet = session.execute(statement);
     assertEquals(false, resultSet.iterator().hasNext());
@@ -66,11 +67,11 @@ class UserAuditServiceTest {
 
   @Test
   void shouldSuccessfullyCreateAudit() {
-    userAuditService.createEventAudit(uuid, Action.UPDATE);
+    userAuditService.createEventAudit(id, Action.UPDATE);
   }
 
   @Test
-  void shouldFailToCreateAuditWithNullUuid() {
+  void shouldFailToCreateAuditWithNullId() {
     assertThrows(
         IllegalArgumentException.class,
         () -> userAuditService.createEventAudit(null, Action.DROPPED_DATABASE));
@@ -78,14 +79,13 @@ class UserAuditServiceTest {
 
   @Test
   void shouldFailToCreateAuditWithNullAction() {
-    assertThrows(
-        IllegalArgumentException.class, () -> userAuditService.createEventAudit(uuid, null));
+    assertThrows(IllegalArgumentException.class, () -> userAuditService.createEventAudit(id, null));
   }
 
   @Test
   void shouldSuccessfullyGetAudit() {
-    List<UserAudit> result = userAuditService.readUserAudit(uuid);
+    List<UserAudit> result = userAuditService.readUserAudit(id);
     assertEquals("User UPDATE from IP 192.168.1.1", result.getFirst().description());
-    assertEquals(uuid, result.getFirst().userId());
+    assertEquals(id, result.getFirst().userId());
   }
 }
